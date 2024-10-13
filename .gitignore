@@ -8,6 +8,9 @@
 # Production build
 /build
 
+# Random Old Files
+/old
+
 # Misc
 .DS_Store
 *.pem
