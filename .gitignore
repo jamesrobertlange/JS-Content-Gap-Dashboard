@@ -30,9 +30,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Project specific
-/public/data.js
-
 # Editor directories and files
 .idea
 .vscode
