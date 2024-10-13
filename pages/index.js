@@ -1,0 +1,151 @@
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { keywordData } from '../public/data.js';
+import Filters from '../components/Filters';
+import KeywordTable from '../components/KeywordTable';
+import CategoryAnalysis from '../components/CategoryAnalysis';
+import QuestionsAnalysis from '../components/QuestionsAnalysis';
+import CategoryDistribution from '../components/CategoryDistribution';
+import CompetitorAnalysis from '../components/CompetitorAnalysis';
+import Sidebar from '../components/Sidebar';
+
+const ClientKeywordsAnalysis = () => {
+  const [categoryFilters, setCategoryFilters] = useState([]);
+  const [searchVolumeFilter, setSearchVolumeFilter] = useState(0);
+  const [questionFilter, setQuestionFilter] = useState(false);
+  const [keywordFilter, setKeywordFilter] = useState('');
+  const [chartMetric, setChartMetric] = useState('searchVolume');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showCompetitors, setShowCompetitors] = useState(true);
+  const [selectedCompetitors, setSelectedCompetitors] = useState([]);
+  const [rankRange, setRankRange] = useState([1, 10]);
+  const [competitorDataType, setCompetitorDataType] = useState('count');
+  const [selectedKeywords, setSelectedKeywords] = useState(new Set());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeView, setActiveView] = useState('keywordTable');
+  const [scrollPosition, setScrollPosition] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollPosition(window.pageYOffset);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const filteredData = useMemo(() => {
+    return keywordData.filter(item => {
+      const categoryMatch = categoryFilters.length === 0 || categoryFilters.includes(item.category);
+      const volumeMatch = item.searchVolume >= searchVolumeFilter;
+      const questionMatch = !questionFilter || item.isQuestion;
+      const keywordMatch = keywordFilter === '' || 
+        keywordFilter.split(',').some(keyword => 
+          item.keyword.toLowerCase().includes(keyword.trim().toLowerCase())
+        );
+      const competitorMatch = item.competitors.some(comp => 
+        (selectedCompetitors.length === 0 || selectedCompetitors.includes(comp.name)) &&
+        comp.rank >= rankRange[0] && comp.rank <= rankRange[1]
+      );
+
+      return categoryMatch && volumeMatch && questionMatch && keywordMatch && competitorMatch;
+    });
+  }, [categoryFilters, searchVolumeFilter, questionFilter, keywordFilter, selectedCompetitors, rankRange]);
+
+  const handleKeywordSelect = useCallback((keyword) => {
+    setSelectedKeywords(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(keyword)) {
+        newSet.delete(keyword);
+      } else {
+        newSet.add(keyword);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  return (
+    <div className="max-w-7xl mx-auto p-8 bg-gray-50 text-gray-800 font-sans">
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        toggleSidebar={toggleSidebar} 
+        activeView={activeView} 
+        setActiveView={setActiveView}
+      />
+      
+      <div className="ml-0 transition-all duration-300 ease-in-out">
+        <button 
+          onClick={toggleSidebar} 
+          className={`fixed left-5 z-50 bg-purple-700 text-white border-none rounded p-3 text-xl cursor-pointer transition-all duration-300 ease-in-out ${
+            scrollPosition > 64 ? 'top-5' : 'top-20'
+          }`}
+        >
+          ☰
+        </button>
+
+        <h1 className="text-4xl font-bold text-center text-purple-700 pb-5 mb-10 border-b-2 border-purple-700">Client's Gap Analysis Dashboard</h1>
+        
+        <Filters
+          categoryFilters={categoryFilters}
+          setCategoryFilters={setCategoryFilters}
+          searchVolumeFilter={searchVolumeFilter}
+          setSearchVolumeFilter={setSearchVolumeFilter}
+          questionFilter={questionFilter}
+          setQuestionFilter={setQuestionFilter}
+          keywordFilter={keywordFilter}
+          setKeywordFilter={setKeywordFilter}
+          showCompetitors={showCompetitors}
+          setShowCompetitors={setShowCompetitors}
+          selectedCompetitors={selectedCompetitors}
+          setSelectedCompetitors={setSelectedCompetitors}
+          rankRange={rankRange}
+          setRankRange={setRankRange}
+        />
+
+        {activeView === 'keywordTable' && (
+          <KeywordTable
+            filteredData={filteredData}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            showCompetitors={showCompetitors}
+            selectedKeywords={selectedKeywords}
+            handleKeywordSelect={handleKeywordSelect}
+          />
+        )}
+
+        {activeView === 'categoryAnalysis' && (
+          <>
+            <CategoryAnalysis
+              filteredData={filteredData}
+              chartMetric={chartMetric}
+              setChartMetric={setChartMetric}
+            />
+
+            <QuestionsAnalysis
+              filteredData={filteredData}
+              chartMetric={chartMetric}
+            />
+
+            <CategoryDistribution
+              filteredData={filteredData}
+            />
+          </>
+        )}
+
+        {activeView === 'competitorAnalysis' && (
+          <CompetitorAnalysis
+            filteredData={filteredData}
+            competitorDataType={competitorDataType}
+            setCompetitorDataType={setCompetitorDataType}
+          />
+        )}
+
+      </div>
+    </div>
+  );
+};
+
+export default ClientKeywordsAnalysis;
