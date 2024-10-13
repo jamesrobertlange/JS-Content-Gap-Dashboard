@@ -105,6 +105,30 @@ const ClientKeywordsAnalysis = () => {
           setRankRange={setRankRange}
         />
 
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4 text-purple-700">Select View</h2>
+          <div className="flex space-x-4">
+            <button
+              onClick={() => setActiveView('keywordTable')}
+              className={`px-4 py-2 rounded ${activeView === 'keywordTable' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
+            >
+              Keyword Table
+            </button>
+            <button
+              onClick={() => setActiveView('categoryAnalysis')}
+              className={`px-4 py-2 rounded ${activeView === 'categoryAnalysis' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
+            >
+              Category Analysis
+            </button>
+            <button
+              onClick={() => setActiveView('competitorAnalysis')}
+              className={`px-4 py-2 rounded ${activeView === 'competitorAnalysis' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
+            >
+              Competitor Analysis
+            </button>
+          </div>
+        </div>
+
         {activeView === 'keywordTable' && (
           <KeywordTable
             filteredData={filteredData}
@@ -123,12 +147,10 @@ const ClientKeywordsAnalysis = () => {
               chartMetric={chartMetric}
               setChartMetric={setChartMetric}
             />
-
             <QuestionsAnalysis
               filteredData={filteredData}
               chartMetric={chartMetric}
             />
-
             <CategoryDistribution
               filteredData={filteredData}
             />
@@ -142,7 +164,6 @@ const ClientKeywordsAnalysis = () => {
             setCompetitorDataType={setCompetitorDataType}
           />
         )}
-
       </div>
     </div>
   );
