@@ -1,34 +1,35 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-
-/**
- * CategoryAnalysis Component
- * 
- * This component provides a visual representation of keyword data grouped by categories.
- * 
- * Features:
- * - Displays a bar chart showing either search volume or keyword count per category
- * - Allows switching between search volume and keyword count metrics
- * - Provides tooltips for detailed information on hover
- * 
- * The component uses the Recharts library for creating responsive and interactive charts.
- * It receives filtered data and chart metric controls as props from the parent Dashboard component.
- */
-
-
 const CategoryAnalysis = ({ filteredData, chartMetric, setChartMetric }) => {
+  const [excludedCategories, setExcludedCategories] = useState([]);
+
+  const toggleCategory = (category) => {
+    setExcludedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
   const chartData = useMemo(() => {
     const groupedData = filteredData.reduce((acc, item) => {
-      if (!acc[item.category]) {
-        acc[item.category] = { category: item.category, searchVolume: 0, count: 0 };
+      if (!excludedCategories.includes(item.category)) {
+        if (!acc[item.category]) {
+          acc[item.category] = { category: item.category, searchVolume: 0, count: 0 };
+        }
+        acc[item.category].searchVolume += item.searchVolume;
+        acc[item.category].count += 1;
       }
-      acc[item.category].searchVolume += item.searchVolume;
-      acc[item.category].count += 1;
       return acc;
     }, {});
     return Object.values(groupedData);
-  }, [filteredData]);
+  }, [filteredData, excludedCategories]);
+
+  const uniqueCategories = useMemo(() => 
+    [...new Set(filteredData.map(item => item.category))],
+    [filteredData]
+  );
 
   return (
     <div style={styles.section}>
@@ -44,6 +45,19 @@ const CategoryAnalysis = ({ filteredData, chartMetric, setChartMetric }) => {
           <option value="searchVolume">Search Volume</option>
           <option value="count">Keyword Count</option>
         </select>
+      </div>
+      <div style={styles.categoryToggle}>
+        {uniqueCategories.map(category => (
+          <label key={category} style={styles.categoryLabel}>
+            <input
+              type="checkbox"
+              checked={!excludedCategories.includes(category)}
+              onChange={() => toggleCategory(category)}
+              style={styles.categoryCheckbox}
+            />
+            {category}
+          </label>
+        ))}
       </div>
       <div style={styles.chartContainer}>
         <ResponsiveContainer width="100%" height={400}>
@@ -105,6 +119,21 @@ const styles = {
   chartContainer: {
     width: '100%',
     height: '400px',
+  },
+  categoryToggle: {
+    marginBottom: '20px',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '10px',
+  },
+  categoryLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+  },
+  categoryCheckbox: {
+    marginRight: '5px',
   },
 };
 

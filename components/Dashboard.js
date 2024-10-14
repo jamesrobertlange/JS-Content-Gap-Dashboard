@@ -1,18 +1,18 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { keywordData } from '../public/data.js';
+import { keywordData } from '../public/kay.js';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import Select from 'react-select';
 import Slider from 'rc-slider';
 import KeywordTable from './KeywordTable';
 import CategoryAnalysis from './CategoryAnalysis';
-import QuestionsAnalysis from './QuestionsAnalysis';
+import QuestionsAnalysis from './BrandedAnalysis.js';
 import CategoryDistribution from './CategoryDistribution';
 import CompetitorAnalysis from './CompetitorAnalysis';
 
 const Dashboard = () => {
   const [categoryFilters, setCategoryFilters] = useState([]);
   const [searchVolumeFilter, setSearchVolumeFilter] = useState(0);
-  const [questionFilter, setQuestionFilter] = useState(false);
+  const [brandedFilter, setBrandedFilter] = useState(false);
   const [keywordFilter, setKeywordFilter] = useState('');
   const [chartMetric, setChartMetric] = useState('searchVolume');
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,7 +27,7 @@ const Dashboard = () => {
     return keywordData.filter(item => {
       const categoryMatch = categoryFilters.length === 0 || categoryFilters.includes(item.category);
       const volumeMatch = item.searchVolume >= searchVolumeFilter;
-      const questionMatch = !questionFilter || item.isQuestion;
+      const brandedMatch = !brandedFilter || item.isBranded;
       const keywordMatch = keywordFilter === '' || 
         keywordFilter.split(',').some(keyword => 
           item.keyword.toLowerCase().includes(keyword.trim().toLowerCase())
@@ -82,7 +82,7 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-gray-50 text-gray-800">
-      <h1 className="text-4xl font-bold text-center text-purple-700 pb-5 mb-10 border-b-2 border-purple-700">Client's Gap Analysis Dashboard</h1>
+      <h1 className="text-4xl font-bold text-center text-purple-700 pb-5 mb-10 border-b-2 border-purple-700">Kay's Gap Analysis Dashboard</h1>
       
       <div className="bg-white rounded-lg p-8 mb-10 shadow-md">
         <h2 className="text-2xl font-semibold mb-6 text-purple-700">Filters</h2>
@@ -135,7 +135,7 @@ const Dashboard = () => {
               type="text"
               value={keywordFilter}
               onChange={(e) => setKeywordFilter(e.target.value)}
-              placeholder="e.g., shampoo, soap"
+              placeholder="e.g., kay, kay diamond, kaydiamonds"
               className="w-full p-3 border border-gray-300 rounded-lg"
             />
           </div>
@@ -231,6 +231,7 @@ const Dashboard = () => {
           />
           <CategoryDistribution
             filteredData={filteredData}
+            chartMetric={chartMetric}
           />
         </>
       )}

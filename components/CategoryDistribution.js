@@ -2,23 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer, Tooltip, Treemap } from 'recharts';
 import { FaChartPie, FaThLarge } from 'react-icons/fa';
 
-/**
- * CategoryDistribution Component
- * 
- * This component provides a detailed breakdown of how keywords and search volume
- * are distributed across different categories.
- * 
- * Features:
- * - Displays two pie charts: one for keyword count distribution and another for search volume distribution
- * - Includes interactive features like hover effects and tooltips
- * - Provides sortable tables below each chart for detailed numerical data
- * - Allows sorting of data by category name, count/volume, or percentage
- * 
- * This component helps identify which categories are most significant in terms of
- * keyword volume and search potential, aiding in prioritization of content and SEO efforts.
- */
-
-
 const COLORS = [
   '#4E79A7', '#F28E2B', '#E15759', '#76B7B2', '#59A14F',
   '#EDC949', '#AF7AA1', '#FF9DA7', '#9C755F', '#BAB0AB',
@@ -27,20 +10,31 @@ const COLORS = [
   '#A14C58', '#4E79A7', '#76B7B2', '#FF9DA7', '#FFBF79'
 ];
 
-const CategoryDistribution = ({ filteredData }) => {
+const CategoryDistribution = ({ filteredData, chartMetric }) => {
   const [activeIndex, setActiveIndex] = useState(null);
   const [activeIndexVolume, setActiveIndexVolume] = useState(null);
   const [countSortConfig, setCountSortConfig] = useState({ key: null, direction: 'ascending' });
   const [volumeSortConfig, setVolumeSortConfig] = useState({ key: null, direction: 'ascending' });
   const [chartType, setChartType] = useState('doughnut');
+  const [excludedCategories, setExcludedCategories] = useState([]);
+
+  const toggleCategory = (category) => {
+    setExcludedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
 
   const pieChartData = useMemo(() => {
     const groupedData = filteredData.reduce((acc, item) => {
-      if (!acc[item.category]) {
-        acc[item.category] = { category: item.category, searchVolume: 0, count: 0 };
+      if (!excludedCategories.includes(item.category)) {
+        if (!acc[item.category]) {
+          acc[item.category] = { category: item.category, searchVolume: 0, count: 0 };
+        }
+        acc[item.category].searchVolume += item.searchVolume;
+        acc[item.category].count += 1;
       }
-      acc[item.category].searchVolume += item.searchVolume;
-      acc[item.category].count += 1;
       return acc;
     }, {});
 
@@ -53,7 +47,12 @@ const CategoryDistribution = ({ filteredData }) => {
       searchVolumePercentage: (item.searchVolume / totalSearchVolume) * 100,
       countPercentage: (item.count / totalCount) * 100
     }));
-  }, [filteredData]);
+  }, [filteredData, excludedCategories]);
+
+  const uniqueCategories = useMemo(() => 
+    [...new Set(filteredData.map(item => item.category))],
+    [filteredData]
+  );
 
   const sortedCountData = useMemo(() => {
     let sortableItems = [...pieChartData];
@@ -308,6 +307,19 @@ const CategoryDistribution = ({ filteredData }) => {
     <div style={styles.section}>
       <h2 style={styles.sectionTitle}>Category Distribution</h2>
       <ChartTypeSelector chartType={chartType} setChartType={setChartType} />
+      <div style={styles.categoryToggle}>
+        {uniqueCategories.map(category => (
+          <label key={category} style={styles.categoryLabel}>
+            <input
+              type="checkbox"
+              checked={!excludedCategories.includes(category)}
+              onChange={() => toggleCategory(category)}
+              style={styles.categoryCheckbox}
+            />
+            {category}
+          </label>
+        ))}
+      </div>
       <div style={styles.flexContainer}>
         <div style={styles.chartContainer}>
           <h3 style={styles.chartTitle}>By Keyword Count</h3>
@@ -464,6 +476,21 @@ const styles = {
   icon: {
     marginRight: '5px',
     fontSize: '16px',
+  },
+  categoryToggle: {
+    marginBottom: '20px',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '10px',
+  },
+  categoryLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+  },
+  categoryCheckbox: {
+    marginRight: '5px',
   },
 };
 

@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { keywordData } from '../public/data.js';
+import Head from 'next/head';
+import { keywordData } from '../public/kay.js';
 import Filters from '../components/Filters';
 import KeywordTable from '../components/KeywordTable';
 import CategoryAnalysis from '../components/CategoryAnalysis';
-import QuestionsAnalysis from '../components/QuestionsAnalysis';
+import BrandedAnalysis from '../components/BrandedAnalysis';
 import CategoryDistribution from '../components/CategoryDistribution';
 import CompetitorAnalysis from '../components/CompetitorAnalysis';
 import Sidebar from '../components/Sidebar';
@@ -11,7 +12,7 @@ import Sidebar from '../components/Sidebar';
 const ClientKeywordsAnalysis = () => {
   const [categoryFilters, setCategoryFilters] = useState([]);
   const [searchVolumeFilter, setSearchVolumeFilter] = useState(0);
-  const [questionFilter, setQuestionFilter] = useState(false);
+  const [brandedFilter, setBrandedFilter] = useState(false);
   const [keywordFilter, setKeywordFilter] = useState('');
   const [chartMetric, setChartMetric] = useState('searchVolume');
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,7 +40,7 @@ const ClientKeywordsAnalysis = () => {
     return keywordData.filter(item => {
       const categoryMatch = categoryFilters.length === 0 || categoryFilters.includes(item.category);
       const volumeMatch = item.searchVolume >= searchVolumeFilter;
-      const questionMatch = !questionFilter || item.isQuestion;
+      const brandedMatch = !brandedFilter || item.isBranded;
       const keywordMatch = keywordFilter === '' || 
         keywordFilter.split(',').some(keyword => 
           item.keyword.toLowerCase().includes(keyword.trim().toLowerCase())
@@ -49,9 +50,9 @@ const ClientKeywordsAnalysis = () => {
         comp.rank >= rankRange[0] && comp.rank <= rankRange[1]
       );
 
-      return categoryMatch && volumeMatch && questionMatch && keywordMatch && competitorMatch;
+      return categoryMatch && volumeMatch && brandedMatch && keywordMatch && competitorMatch;
     });
-  }, [categoryFilters, searchVolumeFilter, questionFilter, keywordFilter, selectedCompetitors, rankRange]);
+  }, [categoryFilters, searchVolumeFilter, brandedFilter, keywordFilter, selectedCompetitors, rankRange]);
 
   const handleKeywordSelect = useCallback((keyword) => {
     setSelectedKeywords(prev => {
@@ -69,6 +70,9 @@ const ClientKeywordsAnalysis = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-gray-50 text-gray-800 font-sans">
+      <Head>
+        <title>Kay's Gap Analysis Dashboard</title>
+      </Head>
       <Sidebar 
         isOpen={sidebarOpen} 
         toggleSidebar={toggleSidebar} 
@@ -86,15 +90,15 @@ const ClientKeywordsAnalysis = () => {
           ☰
         </button>
 
-        <h1 className="text-4xl font-bold text-center text-purple-700 pb-5 mb-10 border-b-2 border-purple-700">Client's Gap Analysis Dashboard</h1>
+        <h1 className="text-4xl font-bold text-center text-purple-700 pb-5 mb-10 border-b-2 border-purple-700">Kay's Gap Analysis Dashboard</h1>
         
         <Filters
           categoryFilters={categoryFilters}
           setCategoryFilters={setCategoryFilters}
           searchVolumeFilter={searchVolumeFilter}
           setSearchVolumeFilter={setSearchVolumeFilter}
-          questionFilter={questionFilter}
-          setQuestionFilter={setQuestionFilter}
+          brandedFilter={brandedFilter}
+          setBrandedFilter={setBrandedFilter}
           keywordFilter={keywordFilter}
           setKeywordFilter={setKeywordFilter}
           showCompetitors={showCompetitors}
@@ -147,12 +151,13 @@ const ClientKeywordsAnalysis = () => {
               chartMetric={chartMetric}
               setChartMetric={setChartMetric}
             />
-            <QuestionsAnalysis
+            <BrandedAnalysis
               filteredData={filteredData}
               chartMetric={chartMetric}
             />
             <CategoryDistribution
               filteredData={filteredData}
+              chartMetric={chartMetric}
             />
           </>
         )}

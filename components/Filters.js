@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import Select from 'react-select';
-import { keywordData } from '../public/data.js';
+import { keywordData } from '../public/kay.js';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 export default function Filters({
@@ -8,8 +8,8 @@ export default function Filters({
   setCategoryFilters,
   searchVolumeFilter,
   setSearchVolumeFilter,
-  questionFilter,
-  setQuestionFilter,
+  brandedFilter,
+  setBrandedFilter,
   keywordFilter,
   setKeywordFilter,
   showCompetitors,
@@ -60,31 +60,45 @@ export default function Filters({
     }
   };
 
+  const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      borderColor: '#ddd',
+      '&:hover': {
+        borderColor: '#6a0dad'
+      }
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? '#6a0dad' : state.isFocused ? '#f0e6f7' : null,
+      color: state.isSelected ? 'white' : '#333',
+    }),
+  };
+
   return (
-    <div className="mb-8">
+    <div style={styles.section}>
       <button
         onClick={() => setIsFiltersVisible(!isFiltersVisible)}
-        className="w-full bg-purple-700 text-white py-2 px-4 rounded-t-lg flex justify-between items-center"
+        style={styles.toggleButton}
       >
         <span>Filters</span>
         {isFiltersVisible ? <FaChevronUp /> : <FaChevronDown />}
       </button>
       {isFiltersVisible && (
-        <div className="bg-white p-6 border-2 border-black rounded-b-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div style={styles.filtersContainer}>
+          <div style={styles.grid}>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categories</label>
+              <label style={styles.label}>Categories</label>
               <Select
                 isMulti
                 options={categoryOptions}
                 value={categoryFilters.map(cat => ({ value: cat, label: cat }))}
                 onChange={handleCategoryChange}
-                className="basic-multi-select"
-                classNamePrefix="select"
+                styles={customStyles}
               />
             </div>
             <div>
-              <label htmlFor="search-volume-filter" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="search-volume-filter" style={styles.label}>
                 Minimum Search Volume
               </label>
               <input
@@ -92,51 +106,49 @@ export default function Filters({
                 type="number"
                 value={searchVolumeFilter}
                 onChange={(e) => setSearchVolumeFilter(Number(e.target.value))}
-                className="w-full p-2 border border-gray-300 rounded-md"
+                style={styles.input}
                 min="0"
               />
             </div>
             <div>
-              <label htmlFor="keyword-filter" className="block text-sm font-medium text-gray-700 mb-1">Keyword Filter</label>
+              <label htmlFor="keyword-filter" style={styles.label}>Keyword Filter</label>
               <input
                 id="keyword-filter"
                 type="text"
                 value={keywordFilter}
                 onChange={(e) => setKeywordFilter(e.target.value)}
-                placeholder="e.g., shampoo, soap"
-                className="w-full p-2 border border-gray-300 rounded-md"
+                placeholder="e.g., kay, kay diamond, kaydiamonds"
+                style={styles.input}
               />
             </div>
           </div>
-          <div className="mt-4 flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  checked={showCompetitors}
-                  onChange={(e) => setShowCompetitors(e.target.checked)}
-                  className="form-checkbox h-5 w-5 text-purple-600"
-                />
-                <span className="ml-2 text-sm text-gray-700">Show Competitors</span>
-              </label>
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  checked={questionFilter}
-                  onChange={(e) => setQuestionFilter(e.target.checked)}
-                  className="form-checkbox h-5 w-5 text-purple-600"
-                />
-                <span className="ml-2 text-sm text-gray-700">Questions Only</span>
-              </label>
-            </div>
+          <div style={styles.checkboxContainer}>
+            <label style={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={showCompetitors}
+                onChange={(e) => setShowCompetitors(e.target.checked)}
+                style={styles.checkbox}
+              />
+              <span>Show Competitors</span>
+            </label>
+            <label style={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={brandedFilter}
+                onChange={(e) => setBrandedFilter(e.target.checked)}
+                style={styles.checkbox}
+              />
+              <span>Branded Only</span>
+            </label>
             {showCompetitors && (
-              <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-gray-700">Rank Range:</label>
+              <div style={styles.rankContainer}>
+                <label style={styles.label}>Rank Range:</label>
                 <input
                   type="number"
                   value={rankRange[0]}
                   onChange={(e) => handleRankRangeChange('min', e.target.value)}
-                  className="w-16 p-1 border border-gray-300 rounded-md"
+                  style={styles.rankInput}
                   min="1"
                   max="100"
                 />
@@ -145,7 +157,7 @@ export default function Filters({
                   type="number"
                   value={rankRange[1]}
                   onChange={(e) => handleRankRangeChange('max', e.target.value)}
-                  className="w-16 p-1 border border-gray-300 rounded-md"
+                  style={styles.rankInput}
                   min="1"
                   max="100"
                 />
@@ -153,15 +165,14 @@ export default function Filters({
             )}
           </div>
           {showCompetitors && (
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Select Competitors</label>
+            <div style={{marginTop: '20px'}}>
+              <label style={styles.label}>Select Competitors</label>
               <Select
                 isMulti
                 options={competitorOptions}
                 value={selectedCompetitors.map(comp => ({ value: comp, label: comp }))}
                 onChange={handleCompetitorChange}
-                className="basic-multi-select"
-                classNamePrefix="select"
+                styles={customStyles}
               />
             </div>
           )}
@@ -170,3 +181,85 @@ export default function Filters({
     </div>
   );
 }
+
+const styles = {
+  section: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    marginBottom: '40px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+    transition: 'all 0.3s ease',
+  },
+  toggleButton: {
+    width: '100%',
+    backgroundColor: '#6a0dad',
+    color: 'white',
+    padding: '15px',
+    border: 'none',
+    borderTopLeftRadius: '12px',
+    borderTopRightRadius: '12px',
+    cursor: 'pointer',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+  },
+  filtersContainer: {
+    padding: '30px',
+    borderBottomLeftRadius: '12px',
+    borderBottomRightRadius: '12px',
+    borderTop: 'none',
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '20px',
+    marginBottom: '20px',
+  },
+  label: {
+    display: 'block',
+    marginBottom: '8px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#333',
+  },
+  input: {
+    width: '100%',
+    padding: '10px',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    fontSize: '1rem',
+  },
+  checkboxContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: '20px',
+    marginBottom: '20px',
+  },
+  checkboxLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: '1rem',
+    color: '#333',
+  },
+  checkbox: {
+    marginRight: '8px',
+    width: '18px',
+    height: '18px',
+    accentColor: '#6a0dad',
+  },
+  rankContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  rankInput: {
+    width: '60px',
+    padding: '8px',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    fontSize: '1rem',
+  },
+};

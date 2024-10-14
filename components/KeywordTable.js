@@ -174,8 +174,8 @@ const KeywordTable = ({
                 </td>
                 <td style={styles.td}>
                   {capitalizeFirstLetter(item.keyword)}
-                  {item.isQuestion && (
-                    <span style={styles.questionTag}>Question</span>
+                  {item.isBranded && (
+                    <span style={styles.brandedTag}>Branded</span>
                   )}
                 </td>
                 <td style={styles.td}>{item.category}</td>
@@ -262,7 +262,7 @@ const styles = {
     marginRight: '8px',
     accentColor: '#6a0dad',
   },
-  questionTag: {
+  brandedTag: {
     backgroundColor: '#6a0dad',
     color: 'white',
     padding: '4px 8px',
