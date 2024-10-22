@@ -14,7 +14,7 @@ const ClientKeywordsAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
 
-  // Other state management
+  // State management
   const [categoryFilters, setCategoryFilters] = useState([]);
   const [searchVolumeFilter, setSearchVolumeFilter] = useState(0);
   const [brandedFilter, setBrandedFilter] = useState(false);
@@ -93,6 +93,14 @@ const ClientKeywordsAnalysis = () => {
         toggleSidebar={toggleSidebar} 
         activeView={activeView} 
         setActiveView={setActiveView}
+        categories={[...new Set(keywordData.map(item => item?.category || ''))]}
+        competitors={[...new Set(keywordData.flatMap(item => 
+          item?.competitors?.map(comp => comp?.name) || []
+        ))]}
+        categoryFilters={categoryFilters}
+        setCategoryFilters={setCategoryFilters}
+        selectedCompetitors={selectedCompetitors}
+        setSelectedCompetitors={setSelectedCompetitors}
       />
       
       <div className="ml-0 transition-all duration-300 ease-in-out">
@@ -113,10 +121,12 @@ const ClientKeywordsAnalysis = () => {
           onDataLoad={handleDataLoad}
           isLoading={isLoading}
         />
-        
-        {dataLoaded ? (
+
+        {/* Only render Filters and content when data is loaded */}
+        {dataLoaded && (
           <>
             <Filters
+              data={keywordData}
               categoryFilters={categoryFilters}
               setCategoryFilters={setCategoryFilters}
               searchVolumeFilter={searchVolumeFilter}
@@ -194,7 +204,9 @@ const ClientKeywordsAnalysis = () => {
               />
             )}
           </>
-        ) : (
+        )}
+
+        {!dataLoaded && (
           <div className="text-center p-8 bg-white rounded-lg shadow-md">
             <h2 className="text-2xl text-gray-700 mb-4">Welcome to the Content Gap Analysis Dashboard</h2>
             <p className="text-gray-600">Please enter a data URL above and click "Load Data" to begin.</p>

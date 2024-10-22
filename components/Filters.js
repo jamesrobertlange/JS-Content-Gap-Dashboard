@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import Select from 'react-select';
-import { keywordData } from '../public/kay.js';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 export default function Filters({
+  data = [], // Provide default empty array
   categoryFilters,
   setCategoryFilters,
   searchVolumeFilter,
@@ -21,32 +21,40 @@ export default function Filters({
 }) {
   const [isFiltersVisible, setIsFiltersVisible] = useState(true);
 
-  const categories = useMemo(() => [...new Set(keywordData.map(item => item.category))], []);
+  const categories = useMemo(() => 
+    data && data.length > 0 ? [...new Set(data.map(item => item.category))] : []
+  , [data]);
   
   const categoryOptions = useMemo(() => 
     categories.map(category => ({ value: category, label: category }))
   , [categories]);
 
   const competitors = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    
     const allCompetitors = new Set();
-    keywordData.forEach(item => {
-      item.competitors.forEach(comp => {
-        allCompetitors.add(comp.name);
-      });
+    data.forEach(item => {
+      if (item.competitors && Array.isArray(item.competitors)) {
+        item.competitors.forEach(comp => {
+          if (comp && comp.name) {
+            allCompetitors.add(comp.name);
+          }
+        });
+      }
     });
     return Array.from(allCompetitors);
-  }, []);
+  }, [data]);
 
   const competitorOptions = useMemo(() => 
     competitors.map(comp => ({ value: comp, label: comp }))
   , [competitors]);
 
   const handleCategoryChange = (selectedOptions) => {
-    setCategoryFilters(selectedOptions.map(option => option.value));
+    setCategoryFilters(selectedOptions ? selectedOptions.map(option => option.value) : []);
   };
 
   const handleCompetitorChange = (selectedOptions) => {
-    setSelectedCompetitors(selectedOptions.map(option => option.value));
+    setSelectedCompetitors(selectedOptions ? selectedOptions.map(option => option.value) : []);
   };
 
   const handleRankRangeChange = (type, value) => {
@@ -74,6 +82,16 @@ export default function Filters({
       color: state.isSelected ? 'white' : '#333',
     }),
   };
+
+  if (!data) {
+    return (
+      <div style={styles.section}>
+        <div style={styles.loadingState}>
+          Loading filters...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.section}>
@@ -117,7 +135,7 @@ export default function Filters({
                 type="text"
                 value={keywordFilter}
                 onChange={(e) => setKeywordFilter(e.target.value)}
-                placeholder="e.g., kay, kay diamond, kaydiamonds"
+                placeholder="e.g., keyword one, keyword two"
                 style={styles.input}
               />
             </div>
@@ -189,6 +207,11 @@ const styles = {
     marginBottom: '40px',
     boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
     transition: 'all 0.3s ease',
+  },
+  loadingState: {
+    padding: '20px',
+    textAlign: 'center',
+    color: '#666',
   },
   toggleButton: {
     width: '100%',

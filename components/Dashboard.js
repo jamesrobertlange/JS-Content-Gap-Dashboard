@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { keywordData } from '../public/kay.js';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import Select from 'react-select';
 import Slider from 'rc-slider';
@@ -82,7 +81,7 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-gray-50 text-gray-800">
-      <h1 className="text-4xl font-bold text-center text-purple-700 pb-5 mb-10 border-b-2 border-purple-700">Kay's Gap Analysis Dashboard</h1>
+      <h1 className="text-4xl font-bold text-center text-purple-700 pb-5 mb-10 border-b-2 border-purple-700">Content Gap Analysis Dashboard</h1>
       
       <div className="bg-white rounded-lg p-8 mb-10 shadow-md">
         <h2 className="text-2xl font-semibold mb-6 text-purple-700">Filters</h2>
@@ -135,7 +134,7 @@ const Dashboard = () => {
               type="text"
               value={keywordFilter}
               onChange={(e) => setKeywordFilter(e.target.value)}
-              placeholder="e.g., kay, kay diamond, kaydiamonds"
+              placeholder="e.g., keyword one, keyword two"
               className="w-full p-3 border border-gray-300 rounded-lg"
             />
           </div>
