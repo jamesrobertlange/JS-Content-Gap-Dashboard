@@ -2,6 +2,7 @@
 /node_modules
 
 /public/data.js
+/public/kay.js
 
 # Next.js build output
 /.next
