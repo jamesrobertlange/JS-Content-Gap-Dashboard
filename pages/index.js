@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Head from 'next/head';
-import { keywordData } from '../public/kay.js';
 import Filters from '../components/Filters';
 import KeywordTable from '../components/KeywordTable';
 import CategoryAnalysis from '../components/CategoryAnalysis';
@@ -8,8 +7,14 @@ import BrandedAnalysis from '../components/BrandedAnalysis';
 import CategoryDistribution from '../components/CategoryDistribution';
 import CompetitorAnalysis from '../components/CompetitorAnalysis';
 import Sidebar from '../components/Sidebar';
+import DataLoader from '../components/DataLoader';
 
 const ClientKeywordsAnalysis = () => {
+  const [keywordData, setKeywordData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Other state management
   const [categoryFilters, setCategoryFilters] = useState([]);
   const [searchVolumeFilter, setSearchVolumeFilter] = useState(0);
   const [brandedFilter, setBrandedFilter] = useState(false);
@@ -36,7 +41,15 @@ const ClientKeywordsAnalysis = () => {
     };
   }, []);
 
+  const handleDataLoad = (data) => {
+    setKeywordData(data);
+    setDataLoaded(true);
+    setIsLoading(false);
+  };
+
   const filteredData = useMemo(() => {
+    if (!keywordData.length) return [];
+
     return keywordData.filter(item => {
       const categoryMatch = categoryFilters.length === 0 || categoryFilters.includes(item.category);
       const volumeMatch = item.searchVolume >= searchVolumeFilter;
@@ -52,7 +65,7 @@ const ClientKeywordsAnalysis = () => {
 
       return categoryMatch && volumeMatch && brandedMatch && keywordMatch && competitorMatch;
     });
-  }, [categoryFilters, searchVolumeFilter, brandedFilter, keywordFilter, selectedCompetitors, rankRange]);
+  }, [keywordData, categoryFilters, searchVolumeFilter, brandedFilter, keywordFilter, selectedCompetitors, rankRange]);
 
   const handleKeywordSelect = useCallback((keyword) => {
     setSelectedKeywords(prev => {
@@ -71,8 +84,10 @@ const ClientKeywordsAnalysis = () => {
   return (
     <div className="max-w-7xl mx-auto p-8 bg-gray-50 text-gray-800 font-sans">
       <Head>
-        <title>Kay's Gap Analysis Dashboard</title>
+        <title>Content Gap Analysis Dashboard</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
+
       <Sidebar 
         isOpen={sidebarOpen} 
         toggleSidebar={toggleSidebar} 
@@ -90,84 +105,114 @@ const ClientKeywordsAnalysis = () => {
           ☰
         </button>
 
-        <h1 className="text-4xl font-bold text-center text-purple-700 pb-5 mb-10 border-b-2 border-purple-700">Kay's Gap Analysis Dashboard</h1>
-        
-        <Filters
-          categoryFilters={categoryFilters}
-          setCategoryFilters={setCategoryFilters}
-          searchVolumeFilter={searchVolumeFilter}
-          setSearchVolumeFilter={setSearchVolumeFilter}
-          brandedFilter={brandedFilter}
-          setBrandedFilter={setBrandedFilter}
-          keywordFilter={keywordFilter}
-          setKeywordFilter={setKeywordFilter}
-          showCompetitors={showCompetitors}
-          setShowCompetitors={setShowCompetitors}
-          selectedCompetitors={selectedCompetitors}
-          setSelectedCompetitors={setSelectedCompetitors}
-          rankRange={rankRange}
-          setRankRange={setRankRange}
+        <h1 className="text-4xl font-bold text-center text-purple-700 pb-5 mb-10 border-b-2 border-purple-700">
+          Content Gap Analysis Dashboard
+        </h1>
+
+        <DataLoader 
+          onDataLoad={handleDataLoad}
+          isLoading={isLoading}
         />
-
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-purple-700">Select View</h2>
-          <div className="flex space-x-4">
-            <button
-              onClick={() => setActiveView('keywordTable')}
-              className={`px-4 py-2 rounded ${activeView === 'keywordTable' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
-            >
-              Keyword Table
-            </button>
-            <button
-              onClick={() => setActiveView('categoryAnalysis')}
-              className={`px-4 py-2 rounded ${activeView === 'categoryAnalysis' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
-            >
-              Category Analysis
-            </button>
-            <button
-              onClick={() => setActiveView('competitorAnalysis')}
-              className={`px-4 py-2 rounded ${activeView === 'competitorAnalysis' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
-            >
-              Competitor Analysis
-            </button>
-          </div>
-        </div>
-
-        {activeView === 'keywordTable' && (
-          <KeywordTable
-            filteredData={filteredData}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            showCompetitors={showCompetitors}
-            selectedKeywords={selectedKeywords}
-            handleKeywordSelect={handleKeywordSelect}
-          />
-        )}
-
-        {activeView === 'categoryAnalysis' && (
+        
+        {dataLoaded ? (
           <>
-            <CategoryAnalysis
-              filteredData={filteredData}
-              chartMetric={chartMetric}
-              setChartMetric={setChartMetric}
+            <Filters
+              categoryFilters={categoryFilters}
+              setCategoryFilters={setCategoryFilters}
+              searchVolumeFilter={searchVolumeFilter}
+              setSearchVolumeFilter={setSearchVolumeFilter}
+              brandedFilter={brandedFilter}
+              setBrandedFilter={setBrandedFilter}
+              keywordFilter={keywordFilter}
+              setKeywordFilter={setKeywordFilter}
+              showCompetitors={showCompetitors}
+              setShowCompetitors={setShowCompetitors}
+              selectedCompetitors={selectedCompetitors}
+              setSelectedCompetitors={setSelectedCompetitors}
+              rankRange={rankRange}
+              setRankRange={setRankRange}
             />
-            <BrandedAnalysis
-              filteredData={filteredData}
-              chartMetric={chartMetric}
-            />
-            <CategoryDistribution
-              filteredData={filteredData}
-              chartMetric={chartMetric}
-            />
-          </>
-        )}
 
-        {activeView === 'competitorAnalysis' && (
-          <CompetitorAnalysis
-            filteredData={filteredData}
-            competitorDataType={competitorDataType}
-            setCompetitorDataType={setCompetitorDataType}
-          />
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4 text-purple-700">Select View</h2>
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => setActiveView('keywordTable')}
+                  className={`px-4 py-2 rounded ${activeView === 'keywordTable' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
+                >
+                  Keyword Table
+                </button>
+                <button
+                  onClick={() => setActiveView('categoryAnalysis')}
+                  className={`px-4 py-2 rounded ${activeView === 'categoryAnalysis' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
+                >
+                  Category Analysis
+                </button>
+                <button
+                  onClick={() => setActiveView('competitorAnalysis')}
+                  className={`px-4 py-2 rounded ${activeView === 'competitorAnalysis' ? 'bg-purple-700 text-white' : 'bg-gray-200'}`}
+                >
+                  Competitor Analysis
+                </button>
+              </div>
+            </div>
+
+            {activeView === 'keywordTable' && (
+              <KeywordTable
+                filteredData={filteredData}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                showCompetitors={showCompetitors}
+                selectedKeywords={selectedKeywords}
+                handleKeywordSelect={handleKeywordSelect}
+              />
+            )}
+
+            {activeView === 'categoryAnalysis' && (
+              <>
+                <CategoryAnalysis
+                  filteredData={filteredData}
+                  chartMetric={chartMetric}
+                  setChartMetric={setChartMetric}
+                />
+                <BrandedAnalysis
+                  filteredData={filteredData}
+                  chartMetric={chartMetric}
+                />
+                <CategoryDistribution
+                  filteredData={filteredData}
+                  chartMetric={chartMetric}
+                />
+              </>
+            )}
+
+            {activeView === 'competitorAnalysis' && (
+              <CompetitorAnalysis
+                filteredData={filteredData}
+                competitorDataType={competitorDataType}
+                setCompetitorDataType={setCompetitorDataType}
+              />
+            )}
+          </>
+        ) : (
+          <div className="text-center p-8 bg-white rounded-lg shadow-md">
+            <h2 className="text-2xl text-gray-700 mb-4">Welcome to the Content Gap Analysis Dashboard</h2>
+            <p className="text-gray-600">Please enter a data URL above and click "Load Data" to begin.</p>
+            <p className="text-gray-500 mt-2 text-sm">Example JSON format:</p>
+            <pre className="bg-gray-100 p-4 rounded-lg mt-2 text-left overflow-x-auto">
+              {JSON.stringify([
+                {
+                  "keyword": "example keyword",
+                  "category": "category name",
+                  "searchVolume": 1000,
+                  "isBranded": false,
+                  "competitors": [
+                    {"name": "competitor.com", "rank": 1}
+                  ]
+                }
+              ], null, 2)}
+            </pre>
+          </div>
         )}
       </div>
     </div>
