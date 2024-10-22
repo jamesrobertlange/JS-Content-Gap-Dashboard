@@ -1,4 +1,4 @@
-# Client's Gap Analysis Dashboard
+# Gap Analysis Dashboard
 
 ## Overview
 
