@@ -1,14 +1,16 @@
 {
-    "name": "JS Content Gap Analysis",
+    "name": "content-gap-analysis",
     "version": "1.0.0",
     "description": "Client Keywords Analysis Dashboard for Gap Analysis",
     "main": "index.js",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
-        "start": "next start"
+        "start": "next start",
+        "lint": "next lint"
     },
     "dependencies": {
+        "@google-cloud/storage": "^6.0.0",
         "autoprefixer": "^10.4.20",
         "lucide-react": "^0.452.0",
         "next": "^14.2.13",
@@ -24,6 +26,8 @@
     "devDependencies": {
         "@types/node": "^20.0.0",
         "@types/react": "^18.2.0",
+        "eslint": "^8.0.0",
+        "eslint-config-next": "^14.0.0",
         "typescript": "^5.0.0"
     }
 }
