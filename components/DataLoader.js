@@ -76,7 +76,7 @@ const DataLoader = ({ onDataLoad, isLoading }) => {
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="Enter data URL (e.g., https://storage.googleapis.com/public-force-directed-json/kay.js)"
+          placeholder="Enter data URL (e.g., https://storage.googleapis.com/public-force-directed-json/db_brand_data.js)"
           className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
         <button
